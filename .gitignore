@@ -1,0 +1,9 @@
+# Google OAuth client (contains the client secret)
+google-client.json
+client_secret_*.json
+
+# Build output: may contain the embedded OAuth client, so it never goes to the public repo.
+StickyNotes.exe
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
