@@ -16,6 +16,23 @@ namespace StickyNotes
         public bool TopMost;
         public float FontSize;
         public bool Collapsed;
+
+        // Sync bookkeeping, in Clock.Now() milliseconds: when the text, color or font size last
+        // changed, and the Modified value of the version this computer last saw in the cloud.
+        public long Modified;
+        public long Synced;
+
+        public NoteData Clone()
+        {
+            return (NoteData)MemberwiseClone();
+        }
+    }
+
+    class StoreData
+    {
+        public readonly List<NoteData> Notes = new List<NoteData>();
+        // Deleted note id -> when it was deleted. Kept so a deletion reaches the other computers.
+        public readonly Dictionary<string, long> Deleted = new Dictionary<string, long>();
     }
 
     static class NoteStore
@@ -28,13 +45,13 @@ namespace StickyNotes
         static readonly string TempPath = Path.Combine(Folder, "notes.tmp.xml");
 
         // Returns null when nothing has been saved yet (first run).
-        public static List<NoteData> Load(out string warning)
+        public static StoreData Load(out string warning)
         {
             warning = null;
             if (!File.Exists(DataPath) && !File.Exists(BackupPath))
                 return null;
 
-            List<NoteData> notes = TryRead(DataPath);
+            StoreData notes = TryRead(DataPath);
             if (notes != null)
                 return notes;
 
@@ -56,10 +73,10 @@ namespace StickyNotes
             warning = keptCopy != null
                 ? "無法讀取便條紙資料，原檔已另存為 " + Path.GetFileName(keptCopy) + "。"
                 : "無法讀取便條紙資料。";
-            return new List<NoteData>();
+            return new StoreData();
         }
 
-        static List<NoteData> TryRead(string path)
+        static StoreData TryRead(string path)
         {
             try
             {
@@ -71,10 +88,10 @@ namespace StickyNotes
                 using (XmlReader reader = XmlReader.Create(path, settings))
                     doc = XDocument.Load(reader, LoadOptions.PreserveWhitespace);
 
-                var notes = new List<NoteData>();
+                var data = new StoreData();
                 foreach (XElement e in doc.Root.Elements("Note"))
                 {
-                    notes.Add(new NoteData
+                    data.Notes.Add(new NoteData
                     {
                         Id = (string)e.Attribute("id"),
                         Text = (string)e.Element("Text") ?? "",
@@ -86,9 +103,17 @@ namespace StickyNotes
                         TopMost = (bool?)e.Attribute("topmost") ?? false,
                         FontSize = (float?)e.Attribute("fontSize") ?? 0f,
                         Collapsed = (bool?)e.Attribute("collapsed") ?? false,
+                        Modified = (long?)e.Attribute("modified") ?? 0,
+                        Synced = (long?)e.Attribute("synced") ?? 0,
                     });
                 }
-                return notes;
+                foreach (XElement e in doc.Root.Elements("Deleted"))
+                {
+                    string id = (string)e.Attribute("id");
+                    if (!string.IsNullOrEmpty(id))
+                        data.Deleted[id] = (long?)e.Attribute("time") ?? 0;
+                }
+                return data;
             }
             catch (Exception)
             {
@@ -96,7 +121,7 @@ namespace StickyNotes
             }
         }
 
-        public static void Save(List<NoteData> notes)
+        public static void Save(List<NoteData> notes, Dictionary<string, long> deleted)
         {
             Directory.CreateDirectory(Folder);
 
@@ -113,8 +138,12 @@ namespace StickyNotes
                     new XAttribute("topmost", n.TopMost),
                     new XAttribute("fontSize", n.FontSize),
                     new XAttribute("collapsed", n.Collapsed),
+                    new XAttribute("modified", n.Modified),
+                    new XAttribute("synced", n.Synced),
                     new XElement("Text", n.Text ?? "")));
             }
+            foreach (KeyValuePair<string, long> d in deleted)
+                root.Add(new XElement("Deleted", new XAttribute("id", d.Key), new XAttribute("time", d.Value)));
 
             var settings = new XmlWriterSettings
             {

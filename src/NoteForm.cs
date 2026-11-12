@@ -29,6 +29,9 @@ namespace StickyNotes
         bool collapsed;
         int expandedHeight;
         bool closingForReal;
+        long modified;
+        long synced;
+        bool applyingSync;
         int lastHeaderDownTick;
         Point lastHeaderDownPos;
 
@@ -36,6 +39,8 @@ namespace StickyNotes
         {
             this.manager = manager;
             id = d.Id;
+            modified = d.Modified;
+            synced = d.Synced;
             colorIndex = d.ColorIndex >= 0 && d.ColorIndex < NoteColors.All.Length ? d.ColorIndex : 0;
             fontSize = Clamp(d.FontSize > 0 ? d.FontSize : DefaultFontSize);
 
@@ -69,7 +74,7 @@ namespace StickyNotes
             text.TextChanged += delegate
             {
                 if (collapsed) header.Invalidate();
-                manager.ScheduleSave();
+                if (!applyingSync) Touch();
             };
 
             body = new EdgePanel();
@@ -173,6 +178,71 @@ namespace StickyNotes
             get { return colorIndex; }
         }
 
+        public string Id
+        {
+            get { return id; }
+        }
+
+        public long Modified
+        {
+            get { return modified; }
+        }
+
+        public long Synced
+        {
+            get { return synced; }
+            set { synced = value; }
+        }
+
+        // Notes arriving from another computer shouldn't steal focus from whatever you're doing.
+        public bool OpenQuietly;
+
+        protected override bool ShowWithoutActivation
+        {
+            get { return OpenQuietly; }
+        }
+
+        // Shows the version that came from the cloud without counting it as a local edit.
+        public void ApplySync(NoteData d)
+        {
+            applyingSync = true;
+            try
+            {
+                string newText = d.Text ?? "";
+                if (text.Text != newText)
+                {
+                    int caret = text.SelectionStart;
+                    text.Text = newText;
+                    text.SelectionStart = Math.Min(caret, text.TextLength);
+                }
+                if (d.ColorIndex >= 0 && d.ColorIndex < NoteColors.All.Length && d.ColorIndex != colorIndex)
+                {
+                    colorIndex = d.ColorIndex;
+                    ApplyColor();
+                }
+                float size = Clamp(d.FontSize > 0 ? d.FontSize : DefaultFontSize);
+                if (size != fontSize)
+                {
+                    fontSize = size;
+                    text.Font = new Font(Ui.TextFontName, fontSize);
+                }
+            }
+            finally
+            {
+                applyingSync = false;
+            }
+            modified = d.Modified;
+            synced = d.Synced;
+        }
+
+        // Marks a change to what gets synced (text, color, font size).
+        void Touch()
+        {
+            // Always move forward, even if this computer's clock is behind the one that wrote last.
+            modified = Math.Max(Clock.Now(), modified + 1);
+            manager.NoteChanged();
+        }
+
         protected override CreateParams CreateParams
         {
             get
@@ -203,6 +273,8 @@ namespace StickyNotes
                 TopMost = TopMost,
                 FontSize = fontSize,
                 Collapsed = collapsed,
+                Modified = modified,
+                Synced = synced,
             };
         }
 
@@ -346,7 +418,7 @@ namespace StickyNotes
             if (index == colorIndex) return;
             colorIndex = index;
             ApplyColor();
-            manager.ScheduleSave();
+            Touch();
         }
 
         void ApplyColor()
@@ -384,7 +456,7 @@ namespace StickyNotes
             if (size == fontSize) return;
             fontSize = size;
             text.Font = new Font(Ui.TextFontName, fontSize);
-            manager.ScheduleSave();
+            Touch();
         }
 
         void SetCollapsed(bool value)

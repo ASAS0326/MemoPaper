@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隱私權政策｜桌面便條紙</title>
+<style>
+  :root {
+    --bg: #FFFBE6; --card: #FFFFFF; --ink: #2E2A1F; --muted: #6B6452;
+    --accent: #F9D65C; --link: #8A5A00; --line: #EFE6C2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1F1E1A; --card: #2A2924; --ink: #ECE8DC; --muted: #A9A392;
+      --accent: #C9A93A; --link: #F2C94C; --line: #3A382F;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Microsoft JhengHei UI", "PingFang TC", "Noto Sans TC", "Segoe UI", sans-serif;
+    line-height: 1.75;
+  }
+  main {
+    max-width: 760px; margin: 40px auto; padding: 32px 40px;
+    background: var(--card); border-top: 10px solid var(--accent); border-radius: 8px;
+  }
+  h1 { font-size: 1.7rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 32px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .updated { color: var(--muted); margin: 0 0 24px; }
+  a { color: var(--link); }
+  code { font-family: Consolas, monospace; font-size: .92em; }
+  ul { padding-left: 1.3em; }
+  @media (max-width: 600px) { main { margin: 0; padding: 24px 16px; border-radius: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>隱私權政策</h1>
+  <p class="updated">桌面便條紙（Desktop Sticky Notes）．最後更新：2026 年 11 月 12 日</p>
+
+  <p>桌面便條紙是在 Windows 電腦上執行的便條紙程式，由開發者個人維護。本政策說明程式如何處理你的 Google 使用者資料。</p>
+
+  <h2>程式存取哪些 Google 資料</h2>
+  <p>只有在你從程式選單選擇「連線 Google 雲端硬碟」並同意授權後，程式才會存取以下資料：</p>
+  <ul>
+    <li><strong>Google 帳號的電子郵件地址</strong>（<code>openid</code>、<code>email</code> 權限）：只用來在程式選單中顯示目前連線的是哪個帳號。</li>
+    <li><strong>Google 雲端硬碟中本程式專屬的應用程式資料夾</strong>（<code>drive.appdata</code> 權限）：用來存放一個 <code>notes.json</code> 檔案，內容是便條紙的文字、顏色、字體大小、修改時間，以及已刪除便條紙的識別碼和刪除時間，讓同一個帳號的多台電腦可以同步。</li>
+  </ul>
+  <p>這個權限<strong>只能存取本程式自己建立的隱藏資料夾</strong>，無法讀取、修改或刪除你 Google 雲端硬碟中的其他任何檔案。</p>
+
+  <h2>資料如何使用與存放</h2>
+  <ul>
+    <li>便條紙資料只存放在<strong>你的電腦</strong>（<code>%APPDATA%\DesktopStickyNotes</code>）和<strong>你自己的 Google 雲端硬碟</strong>。</li>
+    <li>程式直接與 Google 的伺服器連線，<strong>不會把任何資料傳送到開發者或其他第三方的伺服器</strong>。開發者看不到你的便條紙或帳號資料。</li>
+    <li>程式沒有廣告、分析或追蹤功能。</li>
+    <li>Google 核發的授權權杖使用 Windows 資料保護 API（DPAPI）加密後存在你的電腦上，只有你的 Windows 使用者帳號能解開。</li>
+  </ul>
+
+  <h2>分享與轉移</h2>
+  <p>本程式不會出售、出租、分享或轉移你的 Google 使用者資料給任何人，也不會用於廣告或建立使用者檔案。</p>
+  <p>本程式使用及轉移從 Google API 取得的資訊時，會遵守 <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API 服務使用者資料政策</a>，包括「有限使用」（Limited Use）要求。</p>
+
+  <h2>停止使用與刪除資料</h2>
+  <ul>
+    <li><strong>中斷這台電腦的連線</strong>：在工作列圖示選單選「Google 雲端同步」→「中斷連線」，程式會刪除這台電腦上的登入資訊。</li>
+    <li><strong>撤銷所有電腦的授權</strong>：到 <a href="https://myaccount.google.com/connections">Google 帳戶的「第三方應用程式和服務」</a>移除「桌面便條紙」。</li>
+    <li><strong>刪除雲端上的便條紙</strong>：在 Google 雲端硬碟網頁版選「設定」→「管理應用程式」→ 找到本程式 →「刪除隱藏的應用程式資料」。</li>
+    <li><strong>刪除電腦上的便條紙</strong>：刪除 <code>%APPDATA%\DesktopStickyNotes</code> 資料夾。</li>
+  </ul>
+
+  <h2>政策變更</h2>
+  <p>本政策如有修改，會更新此頁面與上方的更新日期。</p>
+
+  <h2>聯絡方式</h2>
+  <p>對本政策有任何問題，請在 <a href="https://github.com/ASAS0326/MemoPaper/issues">GitHub 專案頁面</a>提出 issue。</p>
+
+  <p><a href="./">← 回到桌面便條紙首頁</a></p>
+</main>
+</body>
+</html>

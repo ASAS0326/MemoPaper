@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
@@ -38,6 +39,11 @@ namespace StickyNotes
 
                 using (var activate = new EventWaitHandle(false, EventResetMode.AutoReset, ActivateEventName))
                 {
+                    // Built without a target-framework attribute, .NET runs in 4.0 compatibility mode,
+                    // which doesn't offer TLS 1.2 by default. Google requires it.
+                    ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                    ServicePointManager.Expect100Continue = false;
+
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Application.ThreadException += (s, e) => ReportError(e.Exception);
@@ -65,7 +71,8 @@ namespace StickyNotes
             return SystemIcons.Application;
         }
 
-        static void ReportError(Exception ex)
+        // Appends to error.log in the data folder without bothering the user.
+        public static void LogError(Exception ex)
         {
             try
             {
@@ -74,6 +81,11 @@ namespace StickyNotes
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + ex + Environment.NewLine + Environment.NewLine);
             }
             catch (Exception) { }
+        }
+
+        static void ReportError(Exception ex)
+        {
+            LogError(ex);
             MessageBox.Show("發生錯誤：" + ex.Message + "\n\n詳細資訊已記錄在 error.log。", "桌面便條紙",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
