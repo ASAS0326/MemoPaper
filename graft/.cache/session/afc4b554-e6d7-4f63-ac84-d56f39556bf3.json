@@ -1,10 +1,17 @@
 {
-  "lastQuery": "可以'幫我改成雲端嗎？傳到google之類的 讓我可以跨裝置連線",
+  "lastQuery": "但我切公開會部會都會連線到我GooGle？",
   "perAgentQuery": {},
   "graftReads": 0,
-  "sourceReads": 6,
+  "sourceReads": 9,
   "savedTokens": 0,
-  "injectedPointers": [],
+  "injectedPointers": [
+    "src/GoogleAuth.cs:L86-L483",
+    "src/CloudSync.cs:L64-L67",
+    "src/NoteManager.cs:L432-L452"
+  ],
   "nudges": 0,
-  "host": "claude-code"
+  "host": "claude-code",
+  "inputCostMicros": 6975503,
+  "inputTokensBilled": 11801620,
+  "lastBillingUuid": "897feb07-e823-4d5a-9d82-eccd9a07528c"
 }
